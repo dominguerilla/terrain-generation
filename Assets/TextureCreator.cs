@@ -8,12 +8,25 @@ public class TextureCreator : MonoBehaviour {
     
     [Range(2, 512)]
     public int resolution = 256;
-    public float frequency = 1f;
 
     public NoiseMethodType noiseType;
+
     [Range(1, 3)]
 	public int dimensions = 3;
-    
+
+    public float frequency = 1f;
+
+	[Range(1, 8)]
+	public int octaves = 1;
+
+	[Range(1f, 4f)]
+	public float lacunarity = 2f;
+
+	[Range(0f, 1f)]
+	public float persistence = 0.5f;
+
+    public Gradient coloring;
+
     private Texture2D texture;
 
     private void OnEnable() {
@@ -47,12 +60,12 @@ public class TextureCreator : MonoBehaviour {
             Vector3 point1 = Vector3.Lerp(bottomRight,topRight,(y + .5f) * stepSize);
             for(int x = 0; x < resolution; x++){
                 Vector3 point = Vector3.Lerp(point0, point1, (x + .5f) * stepSize);
-                float sampledPoint = method(point, frequency);
+                float sampledPoint = Noise.Sum(method, point, frequency, octaves, lacunarity, persistence);
                 // needed so that the Perlin value returned is >= 0
                 if(noiseType == NoiseMethodType.Perlin) {
                     sampledPoint = sampledPoint * 0.5f + 0.5f;
                 }
-                texture.SetPixel(x, y, Color.white * sampledPoint);
+                texture.SetPixel(x, y, coloring.Evaluate(sampledPoint));
             }
         }
         texture.Apply();

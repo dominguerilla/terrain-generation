@@ -117,6 +117,19 @@ public static class Noise {
 		return g.x * x + g.y * y;
 	}
 
+    public static float Sum (NoiseMethod method, Vector3 point, float frequency, int octaves, float lacunarity, float persistence) {
+        float sum = method(point, frequency);
+        float amplitude = 1f;
+        float range = 1f;
+        for(int o = 1; o < octaves; o++) {
+            frequency *= lacunarity;
+            amplitude *= persistence;
+            range += amplitude;
+            sum += method(point, frequency) * amplitude;
+        }
+        return sum / range;
+    }
+
     public static float Value1D(Vector3 point, float frequency){
         point *= frequency;
         int roundedX = Mathf.FloorToInt(point.x);
