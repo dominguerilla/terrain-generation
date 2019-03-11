@@ -6,6 +6,9 @@ public class TextureCreator : MonoBehaviour {
     
     [Range(2, 512)]
     public int resolution = 256;
+    public float frequency = 1f;
+    [Range(1, 3)]
+	public int dimensions = 3;
     
     private Texture2D texture;
 
@@ -31,13 +34,14 @@ public class TextureCreator : MonoBehaviour {
         Vector3 topLeft = transform.TransformPoint(new Vector3(-.5f, .5f));
         Vector3 topRight = transform.TransformPoint(new Vector3(.5f, .5f));
 
+		NoiseMethod method = Noise.valueMethods[dimensions - 1];
         float stepSize = 1f / resolution;
         for(int y = 0; y < resolution; y++){
             Vector3 point0 = Vector3.Lerp(bottomLeft,topLeft,(y + .5f) * stepSize);
             Vector3 point1 = Vector3.Lerp(bottomRight,topRight,(y + .5f) * stepSize);
             for(int x = 0; x < resolution; x++){
                 Vector3 point = Vector3.Lerp(point0, point1, (x + .5f) * stepSize);
-                texture.SetPixel(x, y, Color.white * Noise.Value(point));
+                texture.SetPixel(x, y, Color.white * method(point, frequency));
             }
         }
         texture.Apply();
