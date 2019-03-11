@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Creates a texture for the mesh of the GameObject it is attached to.
+// Expects a Quad mesh.
 public class TextureCreator : MonoBehaviour {
     
     [Range(2, 512)]
@@ -29,11 +31,13 @@ public class TextureCreator : MonoBehaviour {
             texture.Resize(resolution, resolution);
         }
 
+        // getting the corners of the quad
         Vector3 bottomLeft = transform.TransformPoint(new Vector3(-.5f, -.5f));
         Vector3 bottomRight = transform.TransformPoint(new Vector3(.5f, -.5f));
         Vector3 topLeft = transform.TransformPoint(new Vector3(-.5f, .5f));
         Vector3 topRight = transform.TransformPoint(new Vector3(.5f, .5f));
-
+        
+        // set the color of the pixel based on its Global coordinates
 		NoiseMethod method = Noise.valueMethods[dimensions - 1];
         float stepSize = 1f / resolution;
         for(int y = 0; y < resolution; y++){

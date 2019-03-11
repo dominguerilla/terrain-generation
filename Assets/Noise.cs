@@ -9,6 +9,7 @@ public static class Noise {
 		Value3D
 	};
 
+    // permutation table; the coordinates of each point are passed through this table (after being masked to fit within its length)
     private static int[] hash = {
         151,160,137, 91, 90, 15,131, 13,201, 95, 96, 53,194,233,  7,225,
 		140, 36,103, 30, 69,142,  8, 99, 37,240, 21, 10, 23,190,  6,148,
