@@ -9,6 +9,8 @@ public class TextureCreator : MonoBehaviour {
     [Range(2, 512)]
     public int resolution = 256;
     public float frequency = 1f;
+
+    public NoiseMethodType noiseType;
     [Range(1, 3)]
 	public int dimensions = 3;
     
@@ -38,7 +40,7 @@ public class TextureCreator : MonoBehaviour {
         Vector3 topRight = transform.TransformPoint(new Vector3(.5f, .5f));
         
         // set the color of the pixel based on its Global coordinates
-		NoiseMethod method = Noise.valueMethods[dimensions - 1];
+		NoiseMethod method = Noise.noiseMethods[(int)noiseType][dimensions - 1];
         float stepSize = 1f / resolution;
         for(int y = 0; y < resolution; y++){
             Vector3 point0 = Vector3.Lerp(bottomLeft,topLeft,(y + .5f) * stepSize);
