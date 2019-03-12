@@ -67,6 +67,7 @@ public class SurfaceCreator : MonoBehaviour {
 		}
         mesh.vertices = vertices;
 		mesh.colors = colors;
+		mesh.RecalculateNormals();
 	}
 
 	public void CreateGrid() {
