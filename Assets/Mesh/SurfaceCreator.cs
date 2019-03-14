@@ -3,6 +3,7 @@
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class SurfaceCreator : MonoBehaviour {
 
+    public bool showNormals;
     public Vector3 offset;
 	public Vector3 rotation;
 
@@ -47,7 +48,17 @@ public class SurfaceCreator : MonoBehaviour {
 		Refresh();
 	}
 
-	public void Refresh () {
+    private void OnDrawGizmosSelected() {
+        if(showNormals && vertices != null){
+            float scale = 1f/resolution;
+            Gizmos.color = Color.yellow;
+            for (int i = 0; i < vertices.Length; i++){
+                Gizmos.DrawRay(vertices[i], normals[i] * scale);
+            }
+        }
+    }
+
+    public void Refresh () {
 		if (resolution != currentResolution) {
 			CreateGrid();
 		}
@@ -79,7 +90,60 @@ public class SurfaceCreator : MonoBehaviour {
 		}
         mesh.vertices = vertices;
 		mesh.colors = colors;
-		mesh.RecalculateNormals();
+        CalculateNormals();
+		mesh.normals = normals;
+	}
+
+    private void CalculateNormals(){
+        for (int v = 0, z = 0; z<= resolution; z++){
+            for(int x = 0; x <= resolution; x++, v++){
+				normals[v] = new Vector3(-GetXDerivative(x, z), 1f, -GetZDerivative(x, z)).normalized;
+            }
+        }
+    }
+
+    private float GetXDerivative(int x, int z){
+		int rowOffset = z * (resolution + 1);
+		float left, right, scale;
+		if (x > 0) {
+			left = vertices[rowOffset + x - 1].y;
+			if (x < resolution) {
+				right = vertices[rowOffset + x + 1].y;
+				scale = 0.5f * resolution;
+			}
+			else {
+				right = vertices[rowOffset + x].y;
+				scale = resolution;
+			}
+		}
+		else {
+			left = vertices[rowOffset + x].y;
+			right = vertices[rowOffset + x + 1].y;
+			scale = resolution;
+		}
+		return (right - left) * scale;
+    }
+
+	private float GetZDerivative (int x, int z) {
+		int rowLength = resolution + 1;
+		float back, forward, scale;
+		if (z > 0) {
+			back = vertices[(z - 1) * rowLength + x].y;
+			if (z < resolution) {
+				forward = vertices[(z + 1) * rowLength + x].y;
+				scale = 0.5f * resolution;
+			}
+			else {
+				forward = vertices[z * rowLength + x].y;
+				scale = resolution;
+			}
+		}
+		else {
+			back = vertices[z * rowLength + x].y;
+			forward = vertices[(z + 1) * rowLength + x].y;
+			scale = resolution;
+		}
+		return (forward - back) * scale;
 	}
 
 	public void CreateGrid() {
