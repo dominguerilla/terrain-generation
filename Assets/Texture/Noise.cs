@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public delegate float NoiseMethod(Vector3 point, float frequency);
+public delegate NoiseSample NoiseMethod(Vector3 point, float frequency);
 
 public enum NoiseMethodType{
     Value,
@@ -117,34 +117,53 @@ public static class Noise {
 		return g.x * x + g.y * y;
 	}
 
-    public static float Sum (NoiseMethod method, Vector3 point, float frequency, int octaves, float lacunarity, float persistence) {
-        float sum = method(point, frequency);
-        float amplitude = 1f;
-        float range = 1f;
-        for(int o = 1; o < octaves; o++) {
-            frequency *= lacunarity;
-            amplitude *= persistence;
-            range += amplitude;
-            sum += method(point, frequency) * amplitude;
-        }
-        return sum / range;
-    }
+	private static float SmoothDerivative (float t) {
+		return 30f * t * t * (t * (t - 2f) + 1f);
+	}
 
-    public static float Value1D(Vector3 point, float frequency){
-        point *= frequency;
-        int roundedX = Mathf.FloorToInt(point.x);
-        float decimalPortion = point.x - roundedX;
-        roundedX &= hashMask;
-        int offsetX = roundedX + 1;
+	public static NoiseSample Sum (
+		NoiseMethod method, Vector3 point, float frequency, int octaves, float lacunarity, float persistence
+	) {
+		NoiseSample sum = method(point, frequency);
+		float amplitude = 1f;
+		float range = 1f;
+		for (int o = 1; o < octaves; o++) {
+			frequency *= lacunarity;
+			amplitude *= persistence;
+			range += amplitude;
+			sum += method(point, frequency) * amplitude;
+		}
+		return sum * (1f / range);
+	}
 
-        int hashedX = hash[roundedX];
-        int hashedOffset = hash[offsetX];
-        decimalPortion = Smooth(decimalPortion);
-        return Mathf.Lerp(hashedX, hashedOffset, decimalPortion) * (1f / hashMask);
+
+    public static NoiseSample Value1D(Vector3 point, float frequency){
+		point *= frequency;
+		int i0 = Mathf.FloorToInt(point.x);
+		float t = point.x - i0;
+		i0 &= hashMask;
+		int i1 = i0 + 1;
+
+		int h0 = hash[i0];
+		int h1 = hash[i1];
+
+        float dt = SmoothDerivative(t);
+		t = Smooth(t);
+
+		float a = h0;
+		float b = h1 - h0;
+
+		NoiseSample sample;
+		sample.value = a + b * t ;
+		sample.derivative.x = b * dt;
+		sample.derivative.y = 0f;
+		sample.derivative.z = 0f;
+		sample.derivative *= frequency;
+		return sample * (1f / hashMask);
     }
 
     // bilinear interpolation between 4 hashes
-	public static float Value2D (Vector3 point, float frequency) {
+	public static NoiseSample Value2D (Vector3 point, float frequency) {
 		point *= frequency;
 		int ix0 = Mathf.FloorToInt(point.x);
 		int iy0 = Mathf.FloorToInt(point.y);
@@ -162,16 +181,27 @@ public static class Noise {
 		int h01 = hash[h0 + iy1];
 		int h11 = hash[h1 + iy1];
 
+		float dtx = SmoothDerivative(tx);
+		float dty = SmoothDerivative(ty);
 		tx = Smooth(tx);
 		ty = Smooth(ty);
-		return Mathf.Lerp(
-			Mathf.Lerp(h00, h10, tx),
-			Mathf.Lerp(h01, h11, tx),
-			ty) * (1f / hashMask);
+
+		float a = h00;
+		float b = h10 - h00;
+		float c = h01 - h00;
+		float d = h11 - h01 - h10 + h00;
+
+		NoiseSample sample;
+		sample.value = a + b * tx + (c + d * tx) * ty;
+		sample.derivative.x = (b + d * ty) * dtx;
+		sample.derivative.y = (c + d * tx) * dty;
+		sample.derivative.z = 0f;
+		sample.derivative *= frequency;
+		return sample * (1f / hashMask);
     }
 
     //trilinear interpolation
-    public static float Value3D (Vector3 point, float frequency) {
+    public static NoiseSample Value3D (Vector3 point, float frequency) {
 		point *= frequency;
 		int ix0 = Mathf.FloorToInt(point.x);
 		int iy0 = Mathf.FloorToInt(point.y);
@@ -201,33 +231,64 @@ public static class Noise {
 		int h011 = hash[h01 + iz1];
 		int h111 = hash[h11 + iz1];
 
+		float dtx = SmoothDerivative(tx);
+		float dty = SmoothDerivative(ty);
+		float dtz = SmoothDerivative(tz);
 		tx = Smooth(tx);
 		ty = Smooth(ty);
 		tz = Smooth(tz);
-		return Mathf.Lerp(
-			Mathf.Lerp(Mathf.Lerp(h000, h100, tx), Mathf.Lerp(h010, h110, tx), ty),
-			Mathf.Lerp(Mathf.Lerp(h001, h101, tx), Mathf.Lerp(h011, h111, tx), ty),
-			tz) * (1f / hashMask);
+
+		float a = h000;
+		float b = h100 - h000;
+		float c = h010 - h000;
+		float d = h001 - h000;
+		float e = h110 - h010 - h100 + h000;
+		float f = h101 - h001 - h100 + h000;
+		float g = h011 - h001 - h010 + h000;
+		float h = h111 - h011 - h101 + h001 - h110 + h010 + h100 - h000;
+
+		NoiseSample sample;
+		sample.value = a + b * tx + (c + e * tx) * ty + (d + f * tx + (g + h * tx) * ty) * tz;
+		sample.derivative.x = (b + e * ty + (f + h * ty) * tz) * dtx;
+		sample.derivative.y = (c + e * tx + (g + h * tx) * tz) * dty;
+		sample.derivative.z = (d + f * tx + (g + h * tx) * ty) * dtz;
+		sample.derivative *= frequency;
+		return sample * (1f / hashMask);
 	}
 
-    public static float Perlin1D(Vector3 point, float frequency){
-        point *= frequency;
-        int roundedX = Mathf.FloorToInt(point.x);
-        float decimalPortion = point.x - roundedX;
-        float offsetGradient = decimalPortion - 1f;
-        roundedX &= hashMask;
-        int offsetX = roundedX + 1;
+    public static NoiseSample Perlin1D(Vector3 point, float frequency){
+		point *= frequency;
+		int i0 = Mathf.FloorToInt(point.x);
+		float t0 = point.x - i0;
+		float t1 = t0 - 1f;
+		i0 &= hashMask;
+		int i1 = i0 + 1;
+		
+		float g0 = gradients1D[hash[i0] & gradientsMask1D];
+		float g1 = gradients1D[hash[i1] & gradientsMask1D];
 
-        float hashedX = gradients1D[hash[roundedX] & gradientsMask1D];
-        float hashedOffset = gradients1D[hash[offsetX] & gradientsMask1D];
+		float v0 = g0 * t0;
+		float v1 = g1 * t1;
 
-        float valuesAtX = hashedX * decimalPortion;
-        float valuesAtOffset = hashedOffset * offsetGradient;
+		float dt = SmoothDerivative(t0);
+		float t = Smooth(t0);
 
-        return Mathf.Lerp(valuesAtX, valuesAtOffset, Smooth(decimalPortion)) * 2f;
+		float a = v0;
+		float b = v1 - v0;
+
+		float da = g0;
+		float db = g1 - g0;
+
+		NoiseSample sample;
+		sample.value = a + b * t;
+		sample.derivative.x = da + db * t + b * dt;
+		sample.derivative.y = 0f;
+		sample.derivative.z = 0f;
+		sample.derivative *= frequency;
+		return sample * 2f;
     }
 
-	public static float Perlin2D (Vector3 point, float frequency) {
+	public static NoiseSample Perlin2D (Vector3 point, float frequency) {
 		point *= frequency;
 		int ix0 = Mathf.FloorToInt(point.x);
 		int iy0 = Mathf.FloorToInt(point.y);
@@ -252,19 +313,36 @@ public static class Noise {
 		float v01 = Dot(g01, tx0, ty1);
 		float v11 = Dot(g11, tx1, ty1);
 		
+		float dtx = SmoothDerivative(tx0);
+		float dty = SmoothDerivative(ty0);
 		float tx = Smooth(tx0);
 		float ty = Smooth(ty0);
-		return Mathf.Lerp(
-			Mathf.Lerp(v00, v10, tx),
-			Mathf.Lerp(v01, v11, tx),
-			ty) * sqrt2;
+
+		float a = v00;
+		float b = v10 - v00;
+		float c = v01 - v00;
+		float d = v11 - v01 - v10 + v00;
+
+		Vector2 da = g00;
+		Vector2 db = g10 - g00;
+		Vector2 dc = g01 - g00;
+		Vector2 dd = g11 - g01 - g10 + g00;
+
+		NoiseSample sample;
+		sample.value = a + b * tx + (c + d * tx) * ty;
+		sample.derivative = da + db * tx + (dc + dd * tx) * ty;
+		sample.derivative.x += (b + d * ty) * dtx;
+		sample.derivative.y += (c + d * tx) * dty;
+		sample.derivative.z = 0f;
+		sample.derivative *= frequency;
+		return sample * sqrt2;
 	}
 
 	private static float Dot (Vector3 g, float x, float y, float z) {
 		return g.x * x + g.y * y + g.z * z;
 	}
 
-    public static float Perlin3D (Vector3 point, float frequency) {
+    public static NoiseSample Perlin3D (Vector3 point, float frequency) {
 		point *= frequency;
 		int ix0 = Mathf.FloorToInt(point.x);
 		int iy0 = Mathf.FloorToInt(point.y);
@@ -306,12 +384,38 @@ public static class Noise {
 		float v011 = Dot(g011, tx0, ty1, tz1);
 		float v111 = Dot(g111, tx1, ty1, tz1);
 
+		float dtx = SmoothDerivative(tx0);
+		float dty = SmoothDerivative(ty0);
+		float dtz = SmoothDerivative(tz0);
 		float tx = Smooth(tx0);
 		float ty = Smooth(ty0);
 		float tz = Smooth(tz0);
-		return Mathf.Lerp(
-			Mathf.Lerp(Mathf.Lerp(v000, v100, tx), Mathf.Lerp(v010, v110, tx), ty),
-			Mathf.Lerp(Mathf.Lerp(v001, v101, tx), Mathf.Lerp(v011, v111, tx), ty),
-			tz);
+
+		float a = v000;
+		float b = v100 - v000;
+		float c = v010 - v000;
+		float d = v001 - v000;
+		float e = v110 - v010 - v100 + v000;
+		float f = v101 - v001 - v100 + v000;
+		float g = v011 - v001 - v010 + v000;
+		float h = v111 - v011 - v101 + v001 - v110 + v010 + v100 - v000;
+
+		Vector3 da = g000;
+		Vector3 db = g100 - g000;
+		Vector3 dc = g010 - g000;
+		Vector3 dd = g001 - g000;
+		Vector3 de = g110 - g010 - g100 + g000;
+		Vector3 df = g101 - g001 - g100 + g000;
+		Vector3 dg = g011 - g001 - g010 + g000;
+		Vector3 dh = g111 - g011 - g101 + g001 - g110 + g010 + g100 - g000;
+
+		NoiseSample sample;
+		sample.value = a + b * tx + (c + e * tx) * ty + (d + f * tx + (g + h * tx) * ty) * tz;
+		sample.derivative = da + db * tx + (dc + de * tx) * ty + (dd + df * tx + (dg + dh * tx) * ty) * tz;
+		sample.derivative.x += (b + e * ty + (f + h * ty) * tz) * dtx;
+		sample.derivative.y += (c + e * tx + (g + h * tx) * tz) * dty;
+		sample.derivative.z += (d + f * tx + (g + h * tx) * ty) * dtz;
+		sample.derivative *= frequency;
+		return sample;
 	}
 }

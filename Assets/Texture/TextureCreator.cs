@@ -60,7 +60,7 @@ public class TextureCreator : MonoBehaviour {
             Vector3 point1 = Vector3.Lerp(bottomRight,topRight,(y + .5f) * stepSize);
             for(int x = 0; x < resolution; x++){
                 Vector3 point = Vector3.Lerp(point0, point1, (x + .5f) * stepSize);
-                float sampledPoint = Noise.Sum(method, point, frequency, octaves, lacunarity, persistence);
+                float sampledPoint = Noise.Sum(method, point, frequency, octaves, lacunarity, persistence).value;
                 // needed so that the Perlin value returned is >= 0
                 if(noiseType == NoiseMethodType.Perlin) {
                     sampledPoint = sampledPoint * 0.5f + 0.5f;
