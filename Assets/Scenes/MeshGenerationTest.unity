@@ -366,12 +366,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   strength: 1
   damping: 0
-  frequency: 1
-  octaves: 1
-  lacunarity: 2
+  frequency: 1.37
+  octaves: 2
+  lacunarity: 2.05
   persistence: 0.5
   dimensions: 3
-  type: 1
+  type: 0
   onChange:
     m_PersistentCalls:
       m_Calls: []

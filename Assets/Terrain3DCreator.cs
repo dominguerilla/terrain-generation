@@ -74,6 +74,8 @@ public class Terrain3DCreator : MonoBehaviour {
 			Vector3 point1 = Vector3.Lerp(point10, point11, y * stepSize);
 			for (int x = 0; x <= resolution; x++, v++) {
 				Vector3 point = Vector3.Lerp(point0, point1, x * stepSize);
+
+                // setting the elevation
                 float elevationSample = elevationGenerator.GetNoise(point);
 				elevationSample = elevationGenerator.type == NoiseMethodType.Value ? (elevationSample - 0.5f) : (elevationSample * 0.5f);
 				if (coloringForStrength) {
@@ -93,16 +95,11 @@ public class Terrain3DCreator : MonoBehaviour {
 	}
 
     Biome GetBiome(float elevation) {
-        if (elevation < -0.4) return Biome.OCEAN;
-        if (elevation < -0.38) return Biome.BEACH;
-
-        if(elevation > 0.3) return Biome.SNOW;
-        
-        if(elevation > 0.1) return Biome.TAIGA;
-
-        if(elevation > -0.2) return Biome.TEMPERATE_RAIN_FOREST;
-
-        return Biome.TROPICAL_RAIN_FOREST;
+        if (elevation < -0.1) return Biome.OCEAN;
+        if (elevation < -0.06) return Biome.BEACH;
+        if (elevation < 0.01) return Biome.TROPICAL_RAIN_FOREST;
+        if (elevation < 0.3) return Biome.TAIGA;
+        return Biome.SNOW;
     }
 
     Color GetBiomeColor(Biome biome) {
