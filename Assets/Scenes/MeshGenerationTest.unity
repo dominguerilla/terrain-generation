@@ -283,20 +283,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1181666350}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c55b343f042fd490783479f4377a291d, type: 3}
+  m_Script: {fileID: 11500000, guid: bd09990043d6aca42ba68e98adb79f0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 200
-  offset: {x: 1.56, y: -0.32, z: -0.22}
+  elevationGenerator: {fileID: 1181666355}
+  resolution: 54
+  offset: {x: -1.6, y: 0.84, z: 0}
   rotation: {x: 0, y: 0, z: 0}
-  strength: 1
-  damping: 0
-  frequency: 1.02
-  octaves: 8
-  lacunarity: 2.01
-  persistence: 0.5
-  dimensions: 3
-  type: 1
   coloring:
     serializedVersion: 2
     key0: {r: 0, g: 0.3197189, b: 0.5471698, a: 1}
@@ -308,10 +301,10 @@ MonoBehaviour:
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 34310
-    ctime2: 37394
-    ctime3: 40863
-    ctime4: 47417
+    ctime1: 18890
+    ctime2: 33539
+    ctime3: 38743
+    ctime4: 51079
     ctime5: 65535
     ctime6: 0
     ctime7: 0
@@ -393,9 +386,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 618b4244099a8c24f8ec1a5c4df47966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resolution: 10
-  offset: {x: 0, y: 0, z: 0}
-  rotation: {x: 0, y: 0, z: 0}
   strength: 1
   damping: 0
   frequency: 1
@@ -404,3 +394,8 @@ MonoBehaviour:
   persistence: 0.5
   dimensions: 3
   type: 1
+  onChange:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null

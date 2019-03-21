@@ -1,13 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class NoiseMaker : MonoBehaviour {
-	[Range(1, 200)]
-	public int resolution = 10;
-
-	public Vector3 offset;
-	public Vector3 rotation;
 
 	[Range(0f, 1f)]
 	public float strength = 1f;
@@ -29,6 +25,8 @@ public class NoiseMaker : MonoBehaviour {
 	public int dimensions = 3;
 	
 	public NoiseMethodType type;
+
+    public UnityEvent onChange;
 
     public float GetNoise(Vector3 point) {
         return Noise.Sum(Noise.methods[(int)type][dimensions - 1], point, frequency, octaves, lacunarity, persistence);

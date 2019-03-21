@@ -28,6 +28,7 @@ public class Terrain3DCreator : MonoBehaviour {
 			mesh.name = "Surface Mesh";
 			GetComponent<MeshFilter>().mesh = mesh;
 		}
+        elevationGenerator.onChange.AddListener(Refresh);
 		Refresh();
 	}
 
