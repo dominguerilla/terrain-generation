@@ -1,5 +1,24 @@
 ﻿using UnityEngine;
 
+
+public enum Biome {
+    OCEAN,
+    BEACH,
+    SCORCHED,
+    BARE,
+    TUNDRA,
+    SNOW,
+    TEMPERATE_DESERT,
+    SHRUBLAND,
+    TAIGA,
+    GRASSLAND,
+    TEMPERATE_DECIDUOUS_FOREST,
+    TEMPERATE_RAIN_FOREST,
+    SUBTROPICAL_DESERT,
+    TROPICAL_SEASONAL_FOREST,
+    TROPICAL_RAIN_FOREST,
+}
+
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class Terrain3DCreator : MonoBehaviour {
 
@@ -11,9 +30,15 @@ public class Terrain3DCreator : MonoBehaviour {
 	public Vector3 offset;
 	public Vector3 rotation;
 
-    public Gradient coloring;
-
 	public bool coloringForStrength;
+
+    public Color oceanColor;
+    public Color beachColor;
+    public Color snowColor;
+    public Color taigaColor;
+    public Color temperateRainForestColor;
+    public Color tropicalRainForestColor;
+    public Color errorColor;
 
 	private Mesh mesh;
 	private Vector3[] vertices;
@@ -52,12 +77,12 @@ public class Terrain3DCreator : MonoBehaviour {
                 float elevationSample = elevationGenerator.GetNoise(point);
 				elevationSample = elevationGenerator.type == NoiseMethodType.Value ? (elevationSample - 0.5f) : (elevationSample * 0.5f);
 				if (coloringForStrength) {
-					colors[v] = coloring.Evaluate(elevationSample + 0.5f);
+					colors[v] = GetBiomeColor(GetBiome(elevationSample));
 					elevationSample *= amplitude;
 				}
 				else {
 					elevationSample *= amplitude;
-					colors[v] = coloring.Evaluate(elevationSample + 0.5f);
+					colors[v] = GetBiomeColor(GetBiome(elevationSample));
 				}
 				vertices[v].y = elevationSample;
 			}
@@ -66,6 +91,38 @@ public class Terrain3DCreator : MonoBehaviour {
 		mesh.colors = colors;
 		mesh.RecalculateNormals();
 	}
+
+    Biome GetBiome(float elevation) {
+        if (elevation < -0.4) return Biome.OCEAN;
+        if (elevation < -0.38) return Biome.BEACH;
+
+        if(elevation > 0.3) return Biome.SNOW;
+        
+        if(elevation > 0.1) return Biome.TAIGA;
+
+        if(elevation > -0.2) return Biome.TEMPERATE_RAIN_FOREST;
+
+        return Biome.TROPICAL_RAIN_FOREST;
+    }
+
+    Color GetBiomeColor(Biome biome) {
+        switch(biome) {
+            case Biome.OCEAN:
+                return oceanColor;
+            case Biome.BEACH:
+                return beachColor;
+            case Biome.SNOW:
+                return snowColor;
+            case Biome.TAIGA:
+                return taigaColor;
+            case Biome.TEMPERATE_RAIN_FOREST:
+                return temperateRainForestColor;
+            case Biome.TROPICAL_RAIN_FOREST:
+                return tropicalRainForestColor;
+            default:
+                return errorColor;
+        }
+    }
 
 	private void CreateGrid () {
 		currentResolution = resolution;
