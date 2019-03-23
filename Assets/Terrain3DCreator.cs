@@ -95,9 +95,9 @@ public class Terrain3DCreator : MonoBehaviour {
 	}
 
     Biome GetBiome(float elevation) {
-        if (elevation < -0.1) return Biome.OCEAN;
-        if (elevation < -0.06) return Biome.BEACH;
-        if (elevation < 0.01) return Biome.TROPICAL_RAIN_FOREST;
+        if (elevation < 0.0) return Biome.OCEAN;
+        if (elevation < 0.02) return Biome.BEACH;
+        if (elevation < 0.11) return Biome.TROPICAL_RAIN_FOREST;
         if (elevation < 0.3) return Biome.TAIGA;
         return Biome.SNOW;
     }

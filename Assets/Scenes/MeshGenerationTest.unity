@@ -296,7 +296,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elevationGenerator: {fileID: 1181666355}
-  resolution: 54
+  resolution: 200
   offset: {x: -1.6, y: 0.84, z: 0}
   rotation: {x: 0, y: 0, z: 0}
   coloringForStrength: 0
@@ -381,7 +381,7 @@ MonoBehaviour:
   strength: 1
   damping: 0
   frequency: 1.37
-  octaves: 2
+  octaves: 5
   lacunarity: 2.05
   persistence: 0.5
   dimensions: 3
