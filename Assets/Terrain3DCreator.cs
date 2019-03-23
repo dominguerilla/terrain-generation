@@ -107,13 +107,13 @@ public class Terrain3DCreator : MonoBehaviour {
                 factor = 0.2f;
                 break;
             case Biome.TROPICAL_RAIN_FOREST:
-                factor = 0.4f;
+                factor = 0.2f;
                 break;
             case Biome.TAIGA:
-                factor = 0.4f;
+                factor = 0.2f;
                 break;
             case Biome.SNOW:
-                factor = 0.42f;
+                factor = 0.22f;
                 break;
             default:
                 factor = 1.0f;
@@ -124,7 +124,7 @@ public class Terrain3DCreator : MonoBehaviour {
 
     Biome GetBiome(float elevation) {
         if (elevation < 0.0) return Biome.OCEAN;
-        if (elevation < 0.02) return Biome.BEACH;
+        if (elevation < 0.05) return Biome.BEACH;
         if (elevation < 0.11) return Biome.TROPICAL_RAIN_FOREST;
         if (elevation < 0.3) return Biome.TAIGA;
         return Biome.SNOW;
