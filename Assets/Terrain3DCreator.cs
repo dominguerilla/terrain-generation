@@ -19,7 +19,7 @@ public enum Biome {
     TROPICAL_RAIN_FOREST,
 }
 
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class Terrain3DCreator : MonoBehaviour {
 
     public NoiseMaker elevationGenerator;
@@ -41,6 +41,7 @@ public class Terrain3DCreator : MonoBehaviour {
     public Color errorColor;
 
 	private Mesh mesh;
+    private MeshCollider meshCol;
 	private Vector3[] vertices;
 	private Vector3[] normals;
 	private Color[] colors;
@@ -53,6 +54,7 @@ public class Terrain3DCreator : MonoBehaviour {
 			mesh.name = "Surface Mesh";
 			GetComponent<MeshFilter>().mesh = mesh;
 		}
+        meshCol = GetComponent<MeshCollider>();
         elevationGenerator.onChange.AddListener(Refresh);
 		Refresh();
 	}
@@ -94,6 +96,7 @@ public class Terrain3DCreator : MonoBehaviour {
 		mesh.vertices = vertices;
 		mesh.colors = colors;
 		mesh.RecalculateNormals();
+        meshCol.sharedMesh = mesh;
 	}
 
     /// <summary>
