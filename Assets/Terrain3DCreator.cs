@@ -78,21 +78,49 @@ public class Terrain3DCreator : MonoBehaviour {
                 // setting the elevation
                 float elevationSample = elevationGenerator.GetNoise(point);
 				elevationSample = elevationGenerator.type == NoiseMethodType.Value ? (elevationSample - 0.5f) : (elevationSample * 0.5f);
+                Biome biome = GetBiome(elevationSample);
+                Color biomeColor = GetBiomeColor(biome);
 				if (coloringForStrength) {
-					colors[v] = GetBiomeColor(GetBiome(elevationSample));
+					colors[v] = biomeColor;
 					elevationSample *= amplitude;
 				}
 				else {
 					elevationSample *= amplitude;
-					colors[v] = GetBiomeColor(GetBiome(elevationSample));
+					colors[v] = biomeColor;
 				}
-				vertices[v].y = elevationSample;
+                vertices[v].y = DampenBiomeElevation(biome, elevationSample);
 			}
 		}
 		mesh.vertices = vertices;
 		mesh.colors = colors;
 		mesh.RecalculateNormals();
 	}
+
+    /// <summary>
+    /// Flattens certain biome elevations.
+    /// </summary>
+    /// <returns></returns>
+    float DampenBiomeElevation(Biome biome, float elevation) {
+        float factor = 1.0f;
+        switch (biome) {
+            case Biome.BEACH:
+                factor = 0.2f;
+                break;
+            case Biome.TROPICAL_RAIN_FOREST:
+                factor = 0.4f;
+                break;
+            case Biome.TAIGA:
+                factor = 0.4f;
+                break;
+            case Biome.SNOW:
+                factor = 0.42f;
+                break;
+            default:
+                factor = 1.0f;
+                break;
+        }
+        return elevation * factor;
+    }
 
     Biome GetBiome(float elevation) {
         if (elevation < 0.0) return Biome.OCEAN;
