@@ -79,6 +79,7 @@ public class Terrain3DCreator : MonoBehaviour {
 
                 // setting the elevation
                 float elevationSample = elevationGenerator.GetNoise(point);
+                // the following ensures that the elevation is always between -0.5 and 0.5
 				elevationSample = elevationGenerator.type == NoiseMethodType.Value ? (elevationSample - 0.5f) : (elevationSample * 0.5f);
                 Biome biome = GetBiome(elevationSample);
                 Color biomeColor = GetBiomeColor(biome);
