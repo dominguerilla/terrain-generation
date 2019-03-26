@@ -5,6 +5,8 @@ using UnityEngine.Events;
 
 public class NoiseMaker : MonoBehaviour {
 
+    public new string name = "NoiseMaker";
+
 	[Range(0f, 1f)]
 	public float strength = 1f;
 
