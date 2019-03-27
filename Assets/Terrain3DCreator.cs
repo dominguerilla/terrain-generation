@@ -97,11 +97,6 @@ public class Terrain3DCreator : MonoBehaviour {
 		mesh.vertices = vertices;
 		mesh.colors = colors;
 		//mesh.RecalculateNormals();
-        
-        for(int i = 0; i < normals.Length; i++) {
-            normals[i] = Vector3.up;
-        }
-        mesh.normals = normals;
         meshCol.sharedMesh = mesh;
 	}
 
