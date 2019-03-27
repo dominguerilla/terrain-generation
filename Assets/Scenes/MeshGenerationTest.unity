@@ -547,7 +547,7 @@ MonoBehaviour:
   name: Elevation
   strength: 1
   damping: 0
-  frequency: 3.57
+  frequency: 7.24
   octaves: 4
   lacunarity: 2.05
   persistence: 0.5
