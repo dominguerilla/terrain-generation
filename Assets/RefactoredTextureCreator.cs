@@ -33,6 +33,7 @@ public class RefactoredTextureCreator : MonoBehaviour {
 		if (transform.hasChanged) {
 			transform.hasChanged = false;
 			FillTexture();
+            onChange.Invoke();
 		}
 	}
 	
@@ -41,8 +42,6 @@ public class RefactoredTextureCreator : MonoBehaviour {
 			texture.Resize(resolution, resolution);
 		}
 		
-        onChange.Invoke();
-
 		Vector3 point00 = transform.TransformPoint(new Vector3(-0.5f,-0.5f) + offset);
 		Vector3 point10 = transform.TransformPoint(new Vector3( 0.5f,-0.5f) + offset);
 		Vector3 point01 = transform.TransformPoint(new Vector3(-0.5f, 0.5f) + offset);

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using UnityEngine.Events;
 
 public enum Biome {
     OCEAN,
@@ -44,6 +44,8 @@ public class Terrain3DCreator : MonoBehaviour {
     public Color temperateRainForestColor;
     public Color tropicalRainForestColor;
     public Color errorColor;
+
+    public UnityEvent onRefresh;
 
 	private Mesh mesh;
     private MeshCollider meshCol;
@@ -107,6 +109,7 @@ public class Terrain3DCreator : MonoBehaviour {
 		mesh.colors = colors;
 		//mesh.RecalculateNormals();
         meshCol.sharedMesh = mesh;
+        onRefresh.Invoke();
 	}
 
     /// <summary>
