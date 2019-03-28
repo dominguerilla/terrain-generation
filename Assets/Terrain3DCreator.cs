@@ -23,6 +23,7 @@ public enum Biome {
 public class Terrain3DCreator : MonoBehaviour {
 
     public NoiseMaker elevationGenerator;
+    public NoiseMaker humidityGenerator;
 
     [Range(1, 200)]
 	public int resolution = 10;
@@ -34,6 +35,10 @@ public class Terrain3DCreator : MonoBehaviour {
 
     public Color oceanColor;
     public Color beachColor;
+    public Color subtropicalDesertColor;
+    public Color grasslandColor;
+    public Color bareColor;
+    public Color shrublandColor;
     public Color snowColor;
     public Color taigaColor;
     public Color temperateRainForestColor;
@@ -56,6 +61,9 @@ public class Terrain3DCreator : MonoBehaviour {
 		}
         meshCol = GetComponent<MeshCollider>();
         elevationGenerator.onChange.AddListener(Refresh);
+        humidityGenerator.onChange.AddListener(Refresh);
+        // TODO: Find a better way than this
+        humidityGenerator.GetComponent<RefactoredTextureCreator>().onChange.AddListener(Refresh);
 		Refresh();
 	}
 
@@ -79,9 +87,10 @@ public class Terrain3DCreator : MonoBehaviour {
 
                 // setting the elevation
                 float elevationSample = elevationGenerator.GetNoise(point);
+                float humiditySample = humidityGenerator.GetNoise(point);
                 // the following ensures that the elevation is always between -0.5 and 0.5
 				elevationSample = elevationGenerator.type == NoiseMethodType.Value ? (elevationSample - 0.5f) : (elevationSample * 0.5f);
-                Biome biome = GetBiome(elevationSample);
+                Biome biome = GetBiome(elevationSample, humiditySample);
                 Color biomeColor = GetBiomeColor(biome);
 				if (coloringForStrength) {
 					colors[v] = biomeColor;
@@ -110,6 +119,9 @@ public class Terrain3DCreator : MonoBehaviour {
             case Biome.BEACH:
                 factor = 0.2f;
                 break;
+            case Biome.SUBTROPICAL_DESERT:
+                factor = 0.2f;
+                break;
             case Biome.TROPICAL_RAIN_FOREST:
                 factor = 0.2f;
                 break;
@@ -120,17 +132,31 @@ public class Terrain3DCreator : MonoBehaviour {
                 factor = 0.22f;
                 break;
             default:
-                factor = 1.0f;
+                factor = 0.21f;
                 break;
         }
         return elevation * factor;
     }
 
-    Biome GetBiome(float elevation) {
+    Biome GetBiome(float elevation, float humidity) {
         if (elevation < 0.0) return Biome.OCEAN;
         if (elevation < 0.05) return Biome.BEACH;
-        if (elevation < 0.11) return Biome.TROPICAL_RAIN_FOREST;
-        if (elevation < 0.3) return Biome.TAIGA;
+        if (elevation < 0.11) {
+            if(humidity < 0.0) {
+                return Biome.SUBTROPICAL_DESERT;
+            }else if (humidity < 0.1) {
+                return Biome.GRASSLAND;
+            }
+            return Biome.TROPICAL_RAIN_FOREST;
+        }
+        if (elevation < 0.25) {
+            if(humidity < 0.0) {
+                return Biome.BARE;
+            }else if (humidity < 0.1) {
+                return Biome.SHRUBLAND;
+            }
+            return Biome.TAIGA;
+        }
         return Biome.SNOW;
     }
 
@@ -146,6 +172,14 @@ public class Terrain3DCreator : MonoBehaviour {
                 return taigaColor;
             case Biome.TEMPERATE_RAIN_FOREST:
                 return temperateRainForestColor;
+            case Biome.SUBTROPICAL_DESERT:
+                return subtropicalDesertColor;
+            case Biome.GRASSLAND:
+                return grasslandColor;
+            case Biome.BARE:
+                return bareColor;
+            case Biome.SHRUBLAND:
+                return shrublandColor;
             case Biome.TROPICAL_RAIN_FOREST:
                 return tropicalRainForestColor;
             default:

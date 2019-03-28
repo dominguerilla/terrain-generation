@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 
 public class RefactoredTextureCreator : MonoBehaviour {
 
@@ -10,6 +11,8 @@ public class RefactoredTextureCreator : MonoBehaviour {
     public Vector3 offset;
 
 	public Gradient coloring;
+
+    public UnityEvent onChange;
 
 	private Texture2D texture;
 	
@@ -38,6 +41,8 @@ public class RefactoredTextureCreator : MonoBehaviour {
 			texture.Resize(resolution, resolution);
 		}
 		
+        onChange.Invoke();
+
 		Vector3 point00 = transform.TransformPoint(new Vector3(-0.5f,-0.5f) + offset);
 		Vector3 point10 = transform.TransformPoint(new Vector3( 0.5f,-0.5f) + offset);
 		Vector3 point01 = transform.TransformPoint(new Vector3(-0.5f, 0.5f) + offset);
