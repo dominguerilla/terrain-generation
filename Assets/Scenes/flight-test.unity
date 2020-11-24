@@ -24720,6 +24720,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forwardSpeed: 10
+  rollSpeed: 50
 --- !u!4 &2129814204
 Transform:
   m_ObjectHideFlags: 0
